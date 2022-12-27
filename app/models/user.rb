@@ -4,6 +4,14 @@ class User < ApplicationRecord
   has_many :passive_followings, class_name: 'Following', foreign_key: 'followed_id', dependent: :destroy
   has_many :followings, through: :active_followings, source: :followed
   has_many :followers, through: :passive_followings, source: :follower
+  has_many :following_clocked_records, through: :followings, source: :clocked_records
+
+  # Get the sleep records rank list of following users in past week
+  #
+  # @return [ClockedRecord::ActiveRecord_Relation] the sleep records rank list
+  def following_sleep_rank_weekly
+    following_clocked_records.in_past_week.sleep_rank
+  end
 
   # Judge if object user id is followed by current user
   #

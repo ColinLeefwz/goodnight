@@ -28,6 +28,18 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe '#following_clocked_records' do
+    let!(:user) { create(:user) }
+    let!(:clocked_record) { create(:clocked_record, user: user) }
+    let!(:followed_user) { create(:user) }
+    let!(:following) { create(:following, followed: followed_user, follower: user) }
+    let!(:following_clocked_record) { create(:clocked_record, user: followed_user) }
+
+    it do
+      expect(user.following_clocked_records).to match_array([following_clocked_record])
+    end
+  end
+
   describe '#following?' do
     let!(:user) { create(:user) }
     let!(:followed_user) { create(:user) }
@@ -90,6 +102,27 @@ RSpec.describe User, type: :model do
       expect(new_clocked_record.clocked_in).to eq clocked_in
       expect(new_clocked_record.status).to eq 'wakeup'
       expect(new_clocked_record.slot_seconds).to eq 300
+    end
+  end
+
+  describe '#following_sleep_rank_weekly' do
+    let!(:user) { create(:user) }
+    let!(:clocked_record) { create(:clocked_record, user: user) }
+    let!(:followed_user) { create(:user) }
+    let!(:following) { create(:following, followed: followed_user, follower: user) }
+
+    before do
+      create(:clocked_record, user: followed_user, clocked_in: 1.week.ago)
+      @expected_record_1 = create(:clocked_record, user: followed_user, clocked_in: 1.week.ago + 1.hour)
+      create(:clocked_record, user: followed_user, clocked_in: 1.week.ago + 2.hour)
+      @expected_record_2 = create(:clocked_record, user: followed_user, clocked_in: 1.week.ago + 6.hour)
+      create(:clocked_record, user: followed_user)
+      create(:clocked_record, user: followed_user, clocked_in: 5.minutes.since)
+    end
+
+    it do
+      expect(user.following_sleep_rank_weekly).to match_array([@expected_record_1, @expected_record_2])
+      expect(user.following_sleep_rank_weekly.first).to eq(@expected_record_2)
     end
   end
 end
