@@ -18,7 +18,7 @@ class User < ApplicationRecord
   #
   # @param id [Integer] object user id
   #
-  # @rase [ActiveRecord::RecordInvalid] when failed validation
+  # @raise [ActiveRecord::RecordInvalid] when failed validation
   # @return [true] succeed in following object user
   def follow!(id)
     active_followings.create!(followed_id: id)
@@ -28,7 +28,7 @@ class User < ApplicationRecord
   #
   # @param id [Integer] object user id
   #
-  # @rase [ActiveRecord::RecordInvalid] when failed validation
+  # @raise [ActiveRecord::RecordInvalid] when failed validation
   # @return [true] succeed in unfollowing object user
   def unfollow!(id)
     active_following = active_followings.find_by(followed_id: id)
@@ -39,7 +39,7 @@ class User < ApplicationRecord
   #
   # @param clocked_in [Datetime] clocked in timestamp
   #
-  # @rase [ActiveRecord::RecordInvalid] when failed validation
+  # @raise [ActiveRecord::RecordInvalid] when failed validation
   # @return [true] succeed in clocking in the timestamp
   def clocked_in!(clocked_in)
     clocked_records.create!(clocked_in: clocked_in)
