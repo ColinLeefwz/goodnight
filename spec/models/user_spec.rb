@@ -17,6 +17,17 @@ RSpec.describe User, type: :model do
     it { expect(user.followers).to match_array([follower_user]) }
   end
 
+  describe '#clocked_records' do
+    let!(:user) { create(:user) }
+    let!(:first_clocked_record) { create(:clocked_record, user: user) }
+    let!(:second_clocked_record) { create(:clocked_record, user: user, clocked_in: 5.minutes.since) }
+
+    it do
+      expect(user.clocked_records).to match_array([first_clocked_record, second_clocked_record])
+      expect(user.clocked_records.first).to eq(second_clocked_record)
+    end
+  end
+
   describe '#following?' do
     let!(:user) { create(:user) }
     let!(:followed_user) { create(:user) }
@@ -53,6 +64,32 @@ RSpec.describe User, type: :model do
       expect(user.reload.following?(expected_unfollowed_user.id)).to be true
       expect{ subject }.to change{ Following.count }.from(1).to(0)
       expect(user.reload.following?(expected_unfollowed_user.id)).to be false
+    end
+  end
+
+  describe '#clocked_in!' do
+    let!(:user) { create(:user) }
+    let!(:first_clocked_record) { create(:clocked_record, user: user) }
+    let!(:clocked_in) { 5.minutes.since }
+
+    subject { user.clocked_in!(clocked_in) }
+
+    context 'when failed in validation' do
+      let!(:clocked_in) { 5.minutes.ago }
+
+      it 'raise ActiveRecord::RecordInvalid exception' do
+        expect(user.clocked_records.first).to eq first_clocked_record
+        expect{ subject }.to raise_error(ActiveRecord::RecordInvalid)
+      end
+    end
+
+    it 'clocked in successfully' do
+      expect(user.clocked_records.first).to eq first_clocked_record
+      expect{ subject }.to change{ ClockedRecord.count }.from(1).to(2)
+      new_clocked_record = user.reload.clocked_records.first
+      expect(new_clocked_record.clocked_in).to eq clocked_in
+      expect(new_clocked_record.status).to eq 'wakeup'
+      expect(new_clocked_record.slot_seconds).to eq 300
     end
   end
 end
