@@ -1,4 +1,5 @@
 class User < ApplicationRecord
+  has_many :clocked_records, dependent: :destroy
   has_many :active_followings, class_name: 'Following', foreign_key: 'follower_id', dependent: :destroy
   has_many :passive_followings, class_name: 'Following', foreign_key: 'followed_id', dependent: :destroy
   has_many :followings, through: :active_followings, source: :followed
@@ -32,5 +33,15 @@ class User < ApplicationRecord
   def unfollow!(id)
     active_following = active_followings.find_by(followed_id: id)
     active_following.destroy!
+  end
+
+  # User clocked in time
+  #
+  # @param clocked_in [Datetime] clocked in timestamp
+  #
+  # @rase [ActiveRecord::RecordInvalid] when failed validation
+  # @return [true] succeed in clocking in the timestamp
+  def clocked_in!(clocked_in)
+    clocked_records.create!(clocked_in: clocked_in)
   end
 end
