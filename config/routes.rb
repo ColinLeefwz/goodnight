@@ -9,5 +9,6 @@ Rails.application.routes.draw do
     put 'follow'
     put 'unfollow'
     get 'is_following'
+    post 'clocked_in'
   end
 end
