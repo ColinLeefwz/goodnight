@@ -9,6 +9,8 @@ class ClockedRecord < ApplicationRecord
   validate :status_not_changed
 
   default_scope { order(clocked_in: :desc) }
+  scope :in_past_week, -> { where(clocked_in: (1.week.ago.beginning_of_week)..(1.week.ago.end_of_week)) }
+  scope :sleep_rank, -> { where.not(slot_seconds: nil).order(slot_seconds: :desc) }
 
   before_validation :set_status_and_slot, on: :create
 
@@ -21,7 +23,7 @@ class ClockedRecord < ApplicationRecord
   end
 
   def set_status_and_slot
-    latest_record = self.class.first
+    latest_record = self.user.clocked_records.first
     return unless latest_record.present?
 
     clocked_in_slot = (self.clocked_in - latest_record.clocked_in).to_i

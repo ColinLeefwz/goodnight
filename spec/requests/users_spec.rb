@@ -144,6 +144,12 @@ RSpec.describe 'Users', type: :request do
     let!(:first_clocked_record) { create(:clocked_record, user: user) }
     let(:response_body) { JSON.parse(response.body) }
     let(:current_time) { 5.minutes.since }
+    let(:expected_user_body) do
+      {
+        'id' => user.id,
+        'name' => user.name
+      }
+    end
 
     subject { post user_clocked_in_path(user_id: user.id) }
 
@@ -168,10 +174,43 @@ RSpec.describe 'Users', type: :request do
     it 'returns all clocked-in records' do
       travel_to current_time do
         expect{ subject }.to change{ ClockedRecord.count }.from(1).to(2)
+        expect(response_body[0]['user']).to eq(expected_user_body)
+        expect(response_body[1]['user']).to eq(expected_user_body)
         expect(response_body[1]['status']).to eq('sleep')
         expect(response_body[0]['status']).to eq('wakeup')
         expect(response).to have_http_status(:ok)
       end
+    end
+  end
+
+  describe 'GET /users/:user_id/sleep_rank' do
+    let!(:user) { create(:user) }
+    let!(:clocked_record) { create(:clocked_record, user: user) }
+    let!(:followed_user) { create(:user) }
+    let!(:following) { create(:following, followed: followed_user, follower: user) }
+    let(:response_body) { JSON.parse(response.body) }
+    let(:current_time) { 5.minutes.since }
+    let(:expected_user_body) do
+      {
+        'id' => followed_user.id,
+        'name' => followed_user.name
+      }
+    end
+
+    subject { get user_sleep_rank_path(user_id: user.id) }
+
+    before do
+      create(:clocked_record, user: followed_user, clocked_in: 1.week.ago)
+      @expected_record = create(:clocked_record, user: followed_user, clocked_in: 1.week.ago + 1.hour)
+      create(:clocked_record, user: followed_user)
+      create(:clocked_record, user: followed_user, clocked_in: 5.minutes.since)
+    end
+
+    it 'returns expected clocked-in records' do
+      subject
+      expect(response_body[0]['user']).to eq(expected_user_body)
+      expect(response_body[0]['status']).to eq('wakeup')
+      expect(response).to have_http_status(:ok)
     end
   end
 end

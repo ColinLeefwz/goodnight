@@ -2,7 +2,8 @@ require 'rails_helper'
 
 RSpec.describe ClockedRecord, type: :model do
   describe '#valid?' do
-    let!(:clocked_record) { create(:clocked_record) }
+    let!(:user) { create(:user) }
+    let!(:clocked_record) { create(:clocked_record, user: user) }
 
     context 'when user is blank' do
       it 'return false' do
@@ -26,7 +27,7 @@ RSpec.describe ClockedRecord, type: :model do
     end
 
     context 'when status of second clocked record is wakeup' do
-      let!(:second_clocked_record) { create(:clocked_record, clocked_in: 5.minutes.since) }
+      let!(:second_clocked_record) { create(:clocked_record, clocked_in: 5.minutes.since, user: user) }
 
       context 'when slot_seconds is blank' do
         it 'returns false' do

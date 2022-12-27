@@ -27,7 +27,7 @@ class UsersController < ApplicationController
     render status: 400, json: { status: 400, message: 'Bad Request' }
   end
 
-  # put /users/:user_id/unfollow
+  # PUT /users/:user_id/unfollow
   def unfollow
     @user.unfollow!(follow_params[:id])
     render json: @user.followings, each_serializer: UserSerializer
@@ -35,12 +35,17 @@ class UsersController < ApplicationController
     render status: 400, json: { status: 400, message: 'Bad Request' }
   end
 
-  # post /users/:user_id/clocked_in
+  # POST /users/:user_id/clocked_in
   def clocked_in
     @user.clocked_in!(Time.current)
     render json: @user.clocked_records, each_serializer: ClockedRecordSerializer
   rescue StandardError
     render status: 400, json: { status: 400, message: 'Bad Request' }
+  end
+
+  # GET /users/:user_id/sleep_rank
+  def sleep_rank
+    render json: @user.following_sleep_rank_weekly, each_serializer: ClockedRecordSerializer
   end
 
   private
