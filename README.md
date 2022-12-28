@@ -70,4 +70,7 @@ npx @apidevtools/swagger-cli bundle docs/openapi.yml -o sample.json
 
 ## Confirm in swagger-editor
 
+<img width="690" alt="image" src="https://user-images.githubusercontent.com/7455902/209760742-e1fbcb10-226e-40dc-8b4b-0dd5d18bc02a.png">
+<img width="782" alt="image" src="https://user-images.githubusercontent.com/7455902/209760766-99f36ba4-5c2e-4025-9dea-288c6de30557.png">
+
 https://editor.swagger.io/
