@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe 'Users', type: :request do
-  describe 'GET /users/:user_id/followers' do
+  describe 'GET /api/v1/users/:user_id/followers' do
     let!(:user) { create(:user) }
     let!(:follower_user) { create(:user) }
     let!(:following) { create(:following, followed: user, follower: follower_user) }
@@ -13,16 +13,17 @@ RSpec.describe 'Users', type: :request do
       }
     end
 
-    subject { get user_followers_path(user_id: user.id) }
+    subject { get api_v1_user_followers_path(user_id: user.id) }
 
     it 'returns all followers' do
       subject
       expect(response_body).to match_array([expected_body])
       expect(response).to have_http_status(:ok)
     end
+    it_behaves_like 'confirms response schema'
   end
 
-  describe 'GET /users/:user_id/followings' do
+  describe 'GET /api/v1/users/:user_id/followings' do
     let!(:user) { create(:user) }
     let!(:followed_user) { create(:user) }
     let!(:following) { create(:following, followed: followed_user, follower: user) }
@@ -34,16 +35,17 @@ RSpec.describe 'Users', type: :request do
       }
     end
 
-    subject { get user_followings_path(user_id: user.id) }
+    subject { get api_v1_user_followings_path(user_id: user.id) }
 
     it 'returns all followings' do
       subject
       expect(response_body).to match_array([expected_body])
       expect(response).to have_http_status(:ok)
     end
+    it_behaves_like 'confirms response schema'
   end
 
-  describe 'GET /users/:user_id/is_following' do
+  describe 'GET /api/v1/users/:user_id/is_following' do
     let!(:user) { create(:user) }
     let!(:followed_user) { create(:user) }
     let!(:unfollowed_user) { create(:user) }
@@ -51,7 +53,7 @@ RSpec.describe 'Users', type: :request do
     let(:follow_id) { followed_user.id }
     let(:response_body) { JSON.parse(response.body) }
 
-    subject { get user_is_following_path(user_id: user.id), params: { id: follow_id} }
+    subject { get api_v1_user_is_following_path(user_id: user.id), params: { id: follow_id} }
 
     context 'when there is unfollowed user' do
       let(:follow_id) { unfollowed_user.id }
@@ -68,9 +70,10 @@ RSpec.describe 'Users', type: :request do
       expect(response_body['result']).to eq(true)
       expect(response).to have_http_status(:ok)
     end
+    it_behaves_like 'confirms response schema'
   end
 
-  describe 'PUT /users/:user_id/follow' do
+  describe 'PUT /api/v1/users/:user_id/follow' do
     let!(:user) { create(:user) }
     let!(:followed_user) { create(:user) }
     let(:follow_id) { followed_user.id }
@@ -82,7 +85,7 @@ RSpec.describe 'Users', type: :request do
       }
     end
 
-    subject { put user_follow_path(user_id: user.id), params: { id: follow_id } }
+    subject { put api_v1_user_follow_path(user_id: user.id), params: { id: follow_id } }
 
     context 'when there is an exception' do
       let(:follow_id) { 'not_available' }
@@ -98,6 +101,7 @@ RSpec.describe 'Users', type: :request do
         expect(response_body).to eq(expected_body)
         expect(response).to have_http_status(400)
       end
+      it_behaves_like 'confirms response schema'
     end
 
     it 'returns all followings' do
@@ -105,16 +109,17 @@ RSpec.describe 'Users', type: :request do
       expect(response_body).to match_array([expected_body])
       expect(response).to have_http_status(:ok)
     end
+    it_behaves_like 'confirms response schema'
   end
 
-  describe 'PUT /users/:user_id/unfollow' do
+  describe 'PUT /api/v1/users/:user_id/unfollow' do
     let!(:user) { create(:user) }
     let!(:followed_user) { create(:user) }
     let!(:following) { create(:following, followed: followed_user, follower: user) }
     let(:follow_id) { followed_user.id }
     let(:response_body) { JSON.parse(response.body) }
 
-    subject { put user_unfollow_path(user_id: user.id), params: { id: follow_id } }
+    subject { put api_v1_user_unfollow_path(user_id: user.id), params: { id: follow_id } }
 
     context 'when there is an exception' do
       let(:follow_id) { 'not_available' }
@@ -130,6 +135,7 @@ RSpec.describe 'Users', type: :request do
         expect(response_body).to eq(expected_body)
         expect(response).to have_http_status(400)
       end
+      it_behaves_like 'confirms response schema'
     end
 
     it 'returns all followings' do
@@ -137,9 +143,10 @@ RSpec.describe 'Users', type: :request do
       expect(response_body).to match_array([])
       expect(response).to have_http_status(:ok)
     end
+    it_behaves_like 'confirms response schema'
   end
 
-  describe 'POST /users/:user_id/clocked_in' do
+  describe 'POST /api/v1/users/:user_id/clocked_in' do
     let!(:user) { create(:user) }
     let!(:first_clocked_record) { create(:clocked_record, user: user) }
     let(:response_body) { JSON.parse(response.body) }
@@ -151,7 +158,7 @@ RSpec.describe 'Users', type: :request do
       }
     end
 
-    subject { post user_clocked_in_path(user_id: user.id) }
+    subject { post api_v1_user_clocked_in_path(user_id: user.id) }
 
     context 'when there is an exception' do
       let(:current_time) { 5.minutes.ago }
@@ -169,6 +176,7 @@ RSpec.describe 'Users', type: :request do
           expect(response).to have_http_status(400)
         end
       end
+      it_behaves_like 'confirms response schema'
     end
 
     it 'returns all clocked-in records' do
@@ -181,9 +189,10 @@ RSpec.describe 'Users', type: :request do
         expect(response).to have_http_status(:ok)
       end
     end
+    it_behaves_like 'confirms response schema'
   end
 
-  describe 'GET /users/:user_id/sleep_rank' do
+  describe 'GET /api/v1/users/:user_id/sleep_rank' do
     let!(:user) { create(:user) }
     let!(:clocked_record) { create(:clocked_record, user: user) }
     let!(:followed_user) { create(:user) }
@@ -197,7 +206,7 @@ RSpec.describe 'Users', type: :request do
       }
     end
 
-    subject { get user_sleep_rank_path(user_id: user.id) }
+    subject { get api_v1_user_sleep_rank_path(user_id: user.id) }
 
     before do
       create(:clocked_record, user: followed_user, clocked_in: 1.week.ago)

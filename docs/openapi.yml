@@ -1,0 +1,318 @@
+openapi: 3.0.2
+
+info:
+  title: Goodnight OpenAPI
+  description: Goodnight OpenAPI Schema
+  contact:
+    name: API support
+    url: http://www.example.com/support
+    email: support@example.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000/api/{api_version}
+    description: local server
+    variables:
+      api_version:
+        default: 'v1'
+        enum:
+          - 'v1'
+
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          description: user id
+          example: 1
+        name:
+          type: string
+          description: user name
+          example: developer01
+    BadRequest:
+      type: object
+      required:
+        - status
+        - message
+      properties:
+        status:
+          type: integer
+          description: request status
+          example: 400
+        message:
+          type: string
+          description: bad request messages
+          example: Bad Request
+
+tags:
+  - name: users
+    description: users api
+
+paths:
+  /users/{userId}/followers:
+    get:
+      summary: get followers of user
+      description: schema of followers' list
+      tags: [users]
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of current user
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+      operationId: get-followers
+  /users/{userId}/followings:
+    get:
+      summary: get followings of user
+      description: schema of followings' list
+      tags: [users]
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of current user
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+      operationId: get-followings
+  /users/{userId}/is_following:
+    get:
+      summary: check if following user
+      description: check if current user is following the object user
+      tags: [users]
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of current user
+        - in: query
+          name: Id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the object user
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+                    description: check result
+                    example: true
+      operationId: check-if-following
+  /users/{userId}/follow:
+    put:
+      summary: follow the object user
+      description: follow the object user and return the following list
+      tags: [users]
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of current user
+      requestBody:
+        description: A JSON object containing user information
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  description: Numeric ID of the object user
+                  example: 1
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+      operationId: follow-user
+  /users/{userId}/unfollow:
+    put:
+      summary: unfollow the object user
+      description: unfollow the object user and return the following list
+      tags: [users]
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of current user
+      requestBody:
+        description: A JSON object containing user information
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  description: Numeric ID of the object user
+                  example: 1
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+      operationId: unfollow-user
+  /users/{userId}/clocked_in:
+    post:
+      summary: user clock-in
+      description: user clock-in the sleep or wakeup time
+      tags: [users]
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of current user
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - id
+                    - clocked_in
+                    - status
+                    - user
+                  properties:
+                    id:
+                      type: integer
+                      description: clocked-in id
+                      example: 1
+                    clocked_in:
+                      type: string
+                      description: clocked-in time
+                      example: 2022-12-28T04:15:05.891Z
+                    slot_seconds:
+                      type: integer
+                      description: sleep slot seconds
+                      nullable: true
+                      example: 10
+                    status:
+                      type: string
+                      description: clocked-in status
+                      enum:
+                        - sleep
+                        - wakeup
+                      example: sleep
+                    user:
+                      $ref: '#/components/schemas/User'
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+      operationId: user-clock-in
+  /users/{userId}/sleep_rank:
+    get:
+      summary: sleep rank of followings
+      description: sleep rank of followings in the past week
+      tags: [users]
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of current user
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - id
+                    - clocked_in
+                    - status
+                    - user
+                  properties:
+                    id:
+                      type: integer
+                      description: clocked-in id
+                      example: 1
+                    clocked_in:
+                      type: string
+                      description: clocked-in time
+                      example: 2022-12-28T04:15:05.891Z
+                    slot_seconds:
+                      type: integer
+                      description: sleep slot seconds
+                      nullable: true
+                      example: 10
+                    status:
+                      type: string
+                      description: clocked-in status
+                      enum:
+                        - sleep
+                        - wakeup
+                      example: sleep
+                    user:
+                      $ref: '#/components/schemas/User'
+      operationId: user-followings-sleep-rank
