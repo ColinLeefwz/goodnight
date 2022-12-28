@@ -1,24 +1,73 @@
-# README
+# setup
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## build the environment and database
 
-Things you may want to cover:
+```sh
+$ bundle install
+$ bin/rails db:create
+$ bin/rails db:migrate
+$ bin/rails db:seed
+```
 
-* Ruby version
+## start server
 
-* System dependencies
+```sh
+$ bin/rails server
+```
 
-* Configuration
+# test
 
-* Database creation
+## Get followers
 
-* Database initialization
+```sh
+$ curl http://localhost:3000/api/v1/users/1/followers
+```
 
-* How to run the test suite
+## Get followings
 
-* Services (job queues, cache servers, search engines, etc.)
+```sh
+$ curl http://localhost:3000/api/v1/users/1/followings
+```
 
-* Deployment instructions
+## Check if following
 
-* ...
+```sh
+$ curl http://localhost:3000/api/v1/users/1/is_following\?id\=2
+```
+
+## Follow user
+
+```sh
+$ curl http://localhost:3000/api/v1/users/1/follow -XPUT -d 'id=2'
+```
+
+## Unfollow user
+
+```sh
+$ curl http://localhost:3000/api/v1/users/1/unfollow -XPUT -d 'id=2'
+```
+
+## Clock-in
+
+```sh
+$ curl http://localhost:3000/api/v1/users/1/clocked_in -XPOST
+```
+
+## Sleep Rank of followings in past week
+
+```sh
+$ curl http://localhost:3000/api/v1/users/1/sleep_rank
+```
+
+# OpenApi Schema
+
+## Generate by swagger-cli
+
+```sh
+npx @apidevtools/swagger-cli validate docs/openapi.yml
+npx @apidevtools/swagger-cli bundle docs/openapi.yml -o sample.json
+```
+
+## Confirm in swagger-editor
+
+https://editor.swagger.io/
